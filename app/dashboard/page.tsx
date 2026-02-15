@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import {
     Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
@@ -117,8 +119,8 @@ export default function Dashboard() {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab
-                                    ? 'border-[#673ab7] text-[#673ab7]'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-[#673ab7] text-[#673ab7]'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             {tab}
