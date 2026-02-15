@@ -32,8 +32,6 @@ export async function GET() {
         const rows = await sheet.getRows();
 
         // 4. Map Rows to Dashboard Format
-        // We need to map the sheet headers (e.g., "Full Name") back to our internal keys (e.g., "full_name")
-        // or just use a consistent structure for the dashboard.
         const formattedSubmissions = rows.map((row) => ({
             timestamp: row.get('Timestamp'),
             full_name: row.get('Full Name'),
@@ -42,7 +40,28 @@ export async function GET() {
             selected_track: row.get('Selected Track'),
             email: row.get('Email'),
             phone: row.get('Phone'),
-            // We can add more fields if needed for detailed view later
+
+            // General
+            why_join: row.get('Why Join'),
+
+            // Track A: Technical
+            tech_skills: row.get('Tech Skills'),
+            github_link: row.get('GitHub'),
+            linkedin_link: row.get('LinkedIn'),
+            portfolio_link_tech: row.get('Portfolio'),
+
+            // Track B: Social
+            instagram_handle: row.get('Insta Handle'),
+            twitter_handle: row.get('Twitter Handle'),
+            social_analysis: row.get('Social Analysis'),
+
+            // Track C: Content
+            content_portfolio: row.get('Portfolio Link'),
+            tools_familiarity: row.get('Tools'),
+
+            // Track D: Outreach
+            cold_outreach_exp: row.get('Cold Outreach'),
+            sponsorship_strategy: row.get('Strategy'),
         }));
 
         return NextResponse.json({ success: true, data: formattedSubmissions });
