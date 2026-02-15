@@ -8,9 +8,17 @@ export async function POST(req: Request) {
         const body = await req.json();
 
         // 1. Prepare Authentication
+        if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_SHEET_ID) {
+            throw new Error('Missing Google Credentials in Environment Variables');
+        }
+
+        const privateKey = process.env.GOOGLE_PRIVATE_KEY
+            .replace(/\\n/g, '\n') // Replace literal \n with actual newlines
+            .replace(/"/g, '');    // Remove any surrounding quotes if they exist
+
         const serviceAccountAuth = new JWT({
             email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-            key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // Handle newlines in ENV variables
+            key: privateKey,
             scopes: [
                 'https://www.googleapis.com/auth/spreadsheets',
             ],
