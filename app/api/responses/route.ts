@@ -59,6 +59,7 @@ export async function GET() {
             // Track C: Content
             content_type: row.get('Content Type'),
             content_portfolio: row.get('Portfolio Link'),
+            content_socials: row.get('Content Socials'), // New field
             tools_familiarity: row.get('Tools'),
 
             // Track D: Outreach

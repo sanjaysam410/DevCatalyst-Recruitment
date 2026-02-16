@@ -326,7 +326,7 @@ export default function Dashboard() {
                                         {activeTab === "Social Media Team" && <th className="px-6 py-3">Handles</th>}
                                         {activeTab === "Social Media Team" && <th className="px-6 py-3">Analysis</th>}
 
-                                        {activeTab === "Content Creation Team" && <th className="px-6 py-3">Portfolio/Tools</th>}
+                                        {activeTab === "Content Creation Team" && <th className="px-6 py-3">Portfolio & Socials</th>}
 
                                         {activeTab === "Outreach Team" && <th className="px-6 py-3">Strategy</th>}
 
@@ -381,8 +381,13 @@ export default function Dashboard() {
                                                 {/* Content Specific */}
                                                 {activeTab === "Content Creation Team" && (
                                                     <td className="px-6 py-4">
-                                                        {sub.content_portfolio && <div className="mb-1"><a href={sub.content_portfolio} target="_blank" className="text-[#673ab7] hover:underline">Portfolio</a></div>}
-                                                        <div className="text-xs text-gray-600">{sub.tools_familiarity}</div>
+                                                        {sub.content_portfolio && <div className="mb-1"><a href={sub.content_portfolio} target="_blank" className="text-[#673ab7] hover:underline font-medium">Portfolio</a></div>}
+                                                        {sub.content_socials && (
+                                                            <div className="mb-2 text-xs text-gray-500 whitespace-pre-wrap max-w-xs">
+                                                                <span className="font-semibold text-gray-700">Socials:</span> {sub.content_socials}
+                                                            </div>
+                                                        )}
+                                                        <div className="text-xs text-gray-600"><span className="font-semibold">Tools:</span> {sub.tools_familiarity}</div>
                                                     </td>
                                                 )}
 

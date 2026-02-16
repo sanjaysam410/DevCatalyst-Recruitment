@@ -183,6 +183,7 @@ export const formStructure: Section[] = [
         id: "portfolio_link_tech",
         type: "text",
         text: "Portfolio / Website Link (Optional)",
+        description: "If sharing a Drive link, ensure 'Anyone with the link' can view.",
         required: false,
         placeholder: "https://..."
       },
@@ -314,8 +315,16 @@ export const formStructure: Section[] = [
       {
         id: "portfolio_link",
         type: "text",
-        text: "Share a Google Drive link with 2-3 samples of your work.",
+        text: "Share a Google Drive link (or Portfolio URL) with 2-3 samples of your work.",
+        description: "IMPORTANT: If using Google Drive, ensuring 'Anyone with the link' has viewing access.",
         required: true
+      },
+      {
+        id: "content_socials",
+        type: "textarea",
+        text: "Social Media Accounts showcasing your work (Instagram, YouTube, etc.) - Optional",
+        description: "Paste links to your creative pages if you have them.",
+        required: false
       },
       {
         id: "creative_process",
