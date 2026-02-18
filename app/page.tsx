@@ -1,381 +1,176 @@
-
 "use client";
 
-import FormHeader from '@/components/FormHeader';
-import QuestionCard from '@/components/QuestionCard';
-import { CheckboxGroup } from '@/components/ui/CheckboxGroup';
-import { Input } from '@/components/ui/Input';
-import { RadioGroup } from '@/components/ui/RadioGroup';
-import { Scale } from '@/components/ui/Scale';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
-import { formStructure, Question, Section } from '@/data/form-structure';
-import React, { useState } from 'react';
-import { z } from 'zod'; // Import Zod
-
-// ---------------------------------------------------------
-// ZOD SCHEMA DEFINITION
-// ---------------------------------------------------------
-
-const formSchema = z.object({
-  // Basic Info
-  full_name: z.string().min(1, "Full Name is required"),
-  roll_number: z.string().regex(/^1608-\d{2}-\d{3}-\d{3}$/, "Format must be 1608-YY-XXX-XXX (e.g., 1608-25-733-019)"),
-  branch: z.string().min(1, "Branch is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-  why_join: z.string().min(50, "Please provide a more detailed answer (min 50 chars)"),
-  goals: z.string().min(1, "Required"),
-
-  // Behavioral
-  prioritization_scenario: z.string().min(1, "Required"),
-  time_commitment: z.string().min(1, "Required"),
-  team_failure_experience: z.string().min(1, "Required"),
-  unlimited_resources: z.string().optional(),
-
-  // Event Planning (Mandatory)
-  event_experience: z.string().min(1, "Required"),
-  event_experience_details: z.string().min(1, "Required"),
-  crisis_management: z.string().min(1, "Required"),
-  event_success_factors: z.string().min(1, "Required"),
-
-  // Track Selection
-  selected_track: z.string().min(1, "Required"),
-
-  // Track A: Technical
-  tech_skills: z.array(z.string()).optional(),
-  github_link: z.string().url("Invalid URL").optional().or(z.literal("")),
-  linkedin_link: z.string().url("Invalid URL").optional().or(z.literal("")),
-  portfolio_link_tech: z.string().url("Invalid URL").optional().or(z.literal("")),
-  learning_approach: z.string().optional(),
-  tech_struggle: z.string().optional(),
-  tech_blocker: z.string().optional(),
-  collaboration_style: z.string().optional(),
-  tech_explain_simple: z.string().optional(),
-
-  // Track B: Social
-  social_platforms: z.array(z.string()).optional(),
-  instagram_handle_social: z.string().optional(),
-  linkedin_handle_social: z.string().optional(), // Text or URL, lenient
-  twitter_handle_social: z.string().optional(),
-  other_socials: z.string().optional(),
-  social_analysis: z.string().optional(),
-  social_writing_task: z.string().optional(),
-  social_influencers: z.string().optional(),
-  social_viral_idea: z.string().optional(),
-  social_trend_critique: z.string().optional(),
-
-  // Track C: Content
-  content_type: z.array(z.string()).optional(),
-  portfolio_link: z.string().optional(),
-  content_socials_ig: z.string().optional(),
-  content_socials_yt: z.string().optional(),
-  content_socials_behance: z.string().optional(),
-  creative_process: z.string().optional(),
-  design_philosophy: z.string().optional(),
-  feedback_handling: z.string().optional(),
-  tools_familiarity: z.array(z.string()).optional(),
-  perfect_content: z.string().optional(),
-
-  // Track D: Outreach
-  cold_outreach_exp: z.string().optional(),
-  email_writing_exercise: z.string().optional(),
-  outreach_comfort: z.number().optional(),
-  sponsorship_strategy: z.string().optional(),
-  persuasion_task: z.string().optional(),
-
-  // Closing
-  culture_fit: z.string().min(1, "Required"),
-  conflict_resolution: z.string().min(1, "Required"),
-  honesty_check: z.number().min(1).max(10),
-  any_questions: z.string().optional(),
-}).passthrough();
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import devCatalystLogo from "../public/assets/DevCatalyst_logo.png";
 
 export default function Home() {
-  type FormValue = string | string[] | number;
 
-  const [formData, setFormData] = useState<Record<string, FormValue>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  // Handle Input Changes
-  const handleChange = (id: string, value: FormValue) => {
-    setFormData(prev => ({ ...prev, [id]: value }));
-    // Clear error when user types
-    if (errors[id]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[id];
-        return newErrors;
-      });
-    }
-  };
-
-  // Check if a section should be visible
-  const isSectionVisible = (section: Section) => {
-    if (!section.condition) return true;
-    return formData[section.condition.fieldId] === section.condition.value;
-  };
-
-  // Validate Form using Zod + Custom Conditional Logic
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    let isValid = true;
-
-    // 1. Zod Basic Validation
-    // We don't rely solely on this because of conditional fields
-    // But we use it for format checks on present data
-
-    // 2. Iterative Validation (Visibility Aware) checking against Zod rules
-    formStructure.forEach(section => {
-      if (!isSectionVisible(section)) return; // Skip hidden sections
-
-      section.questions.forEach(question => {
-        const value = formData[question.id];
-
-        // A. Required Check
-        if (question.required) {
-          const isEmpty =
-            value === undefined ||
-            value === null ||
-            value === "" ||
-            (Array.isArray(value) && value.length === 0);
-
-          if (isEmpty) {
-            newErrors[question.id] = "This is a required question";
-            isValid = false;
-            return; // Skip further format checks if empty
-          }
-        }
-
-        // B. Format Check (using Zod Schema) if value exists
-        if (value && value !== "") {
-          // Extract the specific schema for this field from the Shape
-          const fieldSchema = formSchema.shape[question.id as keyof typeof formSchema.shape];
-          if (fieldSchema) {
-            const fieldResult = fieldSchema.safeParse(value);
-            if (!fieldResult.success) {
-              newErrors[question.id] = fieldResult.error.issues[0].message;
-              isValid = false;
-            }
-          }
-        }
-      });
-    });
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  // Handle Submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    // Store in localStorage for the dashboard (Redundancy/Admin View)
-    try {
-      const existingSubmissions = JSON.parse(localStorage.getItem('recruitment_submissions') || '[]');
-      const newSubmission = {
-        ...formData,
-        timestamp: new Date().toISOString(),
-        id: Date.now().toString(),
-        status: 'Applied'
-      };
-      localStorage.setItem('recruitment_submissions', JSON.stringify([...existingSubmissions, newSubmission]));
-    } catch (e) {
-      console.error("Local storage error", e);
-    }
-
-    // Send to Google Sheets API
-    try {
-      const response = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit to server');
+  const staggerContainer = {
+    initial: {},
+    whileInView: {
+      transition: {
+        staggerChildren: 0.2
       }
-
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error("Submission Error:", error);
-      alert("There was an error submitting your form. Please try again. (Check console for details)");
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+    viewport: { once: true, margin: "-100px" }
   };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen py-8 px-4 bg-[#f0ebf8]">
-        <div className="max-w-[770px] mx-auto bg-white rounded-lg border border-gray-200 border-t-8 border-t-[#673ab7] shadow-sm p-8">
-          <h1 className="text-3xl font-normal text-[#202124] mb-4">
-            Dev Catalyst Recruitment Drive
-          </h1>
-          <p className="text-sm text-[#202124] mb-4">
-            Your response has been recorded.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-[#673ab7] text-sm hover:underline font-medium"
-          >
-            Submit another response
-          </button>
-        </div>
-        <div className="max-w-[770px] mx-auto mt-4 text-center">
-          <p className="text-xs text-[#5f6368]">
-            This content is neither created nor endorsed by Google. - Terms of Service - Privacy Policy
-          </p>
-          <p className="text-xl text-[#5f6368] font-semibold mt-2 opacity-50"> Google Forms </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen py-3 sm:py-8 px-2 sm:px-4">
-      <FormHeader />
-
-      <form onSubmit={handleSubmit} className="max-w-[770px] mx-auto">
-        {formStructure.map((section) => (
-          isSectionVisible(section) && (
-            <div key={section.id} className="mb-4">
-              {/* Section Header Logic */}
-              {section.title !== "Basic Information" && (
-                <div className="mb-4 pt-4 px-1">
-                  <div className="bg-[#673ab7] text-white p-3 rounded-md shadow-sm inline-block min-w-[200px]">
-                    <h2 className="text-lg font-medium">{section.title}</h2>
-                  </div>
-                  {section.description && (
-                    <p className="text-sm text-[#5f6368] mt-2 ml-1 whitespace-pre-line">{section.description}</p>
-                  )}
-                </div>
-              )}
-
-              {section.questions.map((q) => (
-                <QuestionCard
-                  key={q.id}
-                  title={q.text}
-                  required={q.required}
-                  description={q.description}
-                  error={errors[q.id]}
-                >
-                  {renderInput(q, formData, handleChange, errors)}
-                </QuestionCard>
-              ))}
-            </div>
-          )
-        ))}
-
-        <div className="flex justify-between items-center px-4 mt-8 pb-12">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-[#673ab7] text-white px-6 py-2 rounded-[4px] font-medium text-sm hover:bg-[#5e35b1] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+    <div className="min-h-screen bg-[#f0ebf8]">
+      {/* Hero with media */}
+      <section className="relative w-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden bg-[#f0ebf8]">
+        <motion.div
+          className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.6, -0.05, 0.01, 0.99] }}
+        >
+          <motion.h1
+            className="flex items-center justify-center gap-3 sm:gap-4 text-4xl sm:text-5xl md:text-6xl font-bold text-[#202124] mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormData({})}
-            className="text-[#673ab7] text-sm font-medium hover:bg-purple-50 px-3 py-2 rounded">
-            Clear form
-          </button>
-        </div>
-      </form>
-      <div className="max-w-[770px] mx-auto mt-4 text-center pb-8">
-        <p className="text-xs text-[#5f6368]">
-          This content is neither created nor endorsed by Google. - Terms of Service - Privacy Policy
-        </p>
-        <p className="text-xl text-[#5f6368] font-semibold mt-2 opacity-50"> Google Forms </p>
-      </div>
+            <Image
+              src={devCatalystLogo}
+              alt="DevCatalyst Logo"
+              className="h-10 sm:h-14 md:h-16 w-auto"
+            />
+            <span>DevCatalyst Club</span>
+          </motion.h1>
+          <motion.p
+            className="text-lg sm:text-xl text-[#5f6368] max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.6, -0.05, 0.01, 0.99] }}
+          >
+            Where developers and creators learn, build, and grow together.
+          </motion.p>
+          {/* Media: add your club image to public/devcatalyst-hero.jpg or replace with a <video> tag */}
+          <motion.div
+            className="rounded-xl overflow-hidden shadow-lg border border-gray-200 max-w-3xl mx-auto aspect-video bg-white flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+          >
+            <div className="w-full h-full flex items-center justify-center text-[#5f6368] text-center px-6">
+              <Image src="/assets/inauguration.png" alt="DevCatalyst" width={1000} height={1000} />
+            </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Description sections */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <motion.h2
+          className="text-3xl font-semibold text-[#202124] mb-8 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
+          About DevCatalyst
+        </motion.h2>
+
+        <motion.div
+          className="space-y-12"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="whileInView"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          <motion.div
+            className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <h3 className="text-xl font-medium text-[#673ab7] mb-3">What we do</h3>
+            <p className="text-[#5f6368] leading-relaxed">
+              DevCatalyst is a community of passionate developers and creators. We run workshops,
+              hackathons, and projects to help you level up your skills, collaborate with peers,
+              and build things that matter.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <h3 className="text-xl font-medium text-[#673ab7] mb-3">Who it&apos;s for</h3>
+            <p className="text-[#5f6368] leading-relaxed">
+              Whether you&apos;re into coding, design, content, or outreach — there&apos;s a place for you.
+              We have tracks for Technical, Social, Content, and Outreach. Join to learn, contribute,
+              and be part of something bigger.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <h3 className="text-xl font-medium text-[#673ab7] mb-3">Why join</h3>
+            <p className="text-[#5f6368] leading-relaxed">
+              Get hands-on experience, mentorship, and a network of like-minded people. We focus on
+              real projects and events so you can grow while having fun and making an impact.
+            </p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* CTA at the bottom */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pb-24">
+        <motion.div
+          className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#673ab7] p-8 sm:p-12 text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+        >
+          <motion.h2
+            className="text-2xl sm:text-3xl font-semibold text-[#202124] mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.6, -0.05, 0.01, 0.99] }}
+          >
+            Ready to be part of the community?
+          </motion.h2>
+          <motion.p
+            className="text-[#5f6368] mb-8 max-w-lg mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
+          >
+            Fill out the recruitment form and we&apos;ll get in touch. We can&apos;t wait to meet you.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link
+              href="/form"
+              className="inline-block bg-[#673ab7] text-white font-semibold px-8 py-4 rounded-lg shadow-md hover:bg-[#5e35b1] transition-colors"
+            >
+              Join Community
+            </Link>
+          </motion.div>
+        </motion.div>
+      </section>
     </div>
   );
-}
-
-// Helper to render specific input types
-function renderInput(
-  q: Question,
-  formData: Record<string, string | string[] | number>,
-  handleChange: (id: string, val: string | string[] | number) => void,
-  errors: Record<string, string>
-) {
-  const value = formData[q.id] !== undefined ? formData[q.id] : (q.type === 'checkbox' ? [] : "");
-
-  switch (q.type) {
-    case 'text':
-      return (
-        <Input
-          type="text"
-          value={value as string}
-          onChange={(e) => handleChange(q.id, e.target.value)}
-          placeholder={q.placeholder || "Your answer"}
-          error={!!errors[q.id]}
-        />
-      );
-    case 'textarea':
-    case 'ranking':
-      return (
-        <Textarea
-          value={value as string}
-          onChange={(e) => handleChange(q.id, e.target.value)}
-          placeholder="Your answer"
-          error={!!errors[q.id]}
-        />
-      );
-    case 'radio':
-      return (
-        <RadioGroup
-          name={q.id}
-          options={q.options || []}
-          value={value as string}
-          onChange={(val) => handleChange(q.id, val)}
-          error={!!errors[q.id]}
-        />
-      );
-    case 'checkbox':
-      return (
-        <CheckboxGroup
-          name={q.id}
-          options={q.options || []}
-          value={value as string[]}
-          onChange={(val) => handleChange(q.id, val)}
-          error={!!errors[q.id]}
-        />
-      );
-    case 'select':
-      return (
-        <Select
-          options={q.options || []}
-          value={value as string}
-          onChange={(e) => handleChange(q.id, e.target.value)}
-          placeholder={q.placeholder || "Choose"}
-          error={!!errors[q.id]}
-        />
-      );
-    case 'scale':
-      return (
-        <Scale
-          name={q.id}
-          min={q.min || 1}
-          max={q.max || 5}
-          minLabel={q.minLabel}
-          maxLabel={q.maxLabel}
-          value={value as number}
-          onChange={(val) => handleChange(q.id, val)}
-          error={!!errors[q.id]}
-        />
-      );
-    default:
-      return null;
-  }
 }
