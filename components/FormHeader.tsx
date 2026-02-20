@@ -4,8 +4,8 @@ export default function FormHeader() {
     return (
         <div className="max-w-[770px] mx-auto bg-white rounded-lg border border-gray-200 border-t-8 border-t-[#673ab7] shadow-sm mb-4">
             <div className="p-6 pt-5">
-                <h1 className="text-[32px] leading-[40px] font-normal text-[#202124] mb-3">
-                    Dev Catalyst Recruitment Drive
+                <h1 className="text-[32px] leading-[40px] font-bold text-[#202124] mb-3">
+                    DevCatalyst Recruitment Drive
                 </h1>
                 <div className="text-sm text-[#202124] whitespace-pre-wrap mb-4">
                     <p className="mb-2">

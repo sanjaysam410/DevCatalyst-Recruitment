@@ -4,8 +4,17 @@ import { useEffect, useState } from 'react';
 import {
     Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
+import PasswordGate from '../components/PasswordGate';
 
-export default function Dashboard() {
+export default function DashboardPage() {
+    return (
+        <PasswordGate>
+            <Dashboard />
+        </PasswordGate>
+    );
+}
+
+function Dashboard() {
     const [submissions, setSubmissions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("Overview");
@@ -103,12 +112,23 @@ export default function Dashboard() {
                     <h1 className="text-2xl font-normal">Recruitment Dashboard</h1>
                     <p className="text-sm text-gray-600">Dev Catalyst • Response Summary</p>
                 </div>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-50 shadow-sm"
-                >
-                    Refresh Data
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-50 shadow-sm"
+                    >
+                        Refresh Data
+                    </button>
+                    <button
+                        onClick={() => {
+                            sessionStorage.removeItem("dashboard_auth");
+                            window.location.reload();
+                        }}
+                        className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded text-sm hover:bg-red-100 shadow-sm transition-colors"
+                    >
+                        Logout
+                    </button>
+                </div>
             </div>
 
             {/* Tabs */}

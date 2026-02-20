@@ -5,6 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import devCatalystLogo from "../public/assets/DevCatalyst_logo.png";
 import VantaBackground from "./components/VantaBackground";
+import DynamicIslandNav from "./components/DynamicIslandNav";
+
+const NAV_SECTIONS = [
+  { id: "hero", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "join", label: "Join Us" },
+];
 
 export default function Home() {
 
@@ -20,8 +27,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <DynamicIslandNav sections={NAV_SECTIONS} />
+
       {/* Hero with media */}
-      <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden text-white">
+      <section id="hero" className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden text-white">
         {/* Vanta Background */}
         <VantaBackground />
         <motion.div
@@ -63,9 +72,9 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Description sections */}
-      <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden py-16">
-        {/* Video Background moved here */}
+      {/* Video Section */}
+      <section id="about" className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* Video Background */}
         <div className="absolute inset-0 w-full h-full z-0">
           <video
             src="/assets/Induction/DC_Inductn_Intro.mp4"
@@ -73,119 +82,107 @@ export default function Home() {
             muted
             loop
             playsInline
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          {/* Glossy overlay layers */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5"></div>
+          <div className="absolute inset-0 backdrop-brightness-110 backdrop-saturate-125"></div>
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
-          <motion.h2
-            className="text-3xl font-semibold text-white mb-8 text-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
-            About DevCatalyst
-          </motion.h2>
-
           <motion.div
-            className="space-y-12"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="whileInView"
+            className="bg-black/50 backdrop-blur-md rounded-2xl shadow-[0_0_40px_rgba(244,244,244,0.3),0_0_80px_rgba(244,244,244,0.15)] border border-white/20 p-8 sm:p-12 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
           >
-            <motion.div
-              className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
-              initial={{ opacity: 0, y: 30 }}
+            <motion.h2
+              className="text-5xl sm:text-5xl font-semibold text-white mb-4"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.6, -0.05, 0.01, 0.99] }}
             >
-              <h3 className="text-xl font-medium text-[#673ab7] mb-3">What we do</h3>
-              <p className="text-[#5f6368] leading-relaxed">
-                DevCatalyst is a community of passionate developers and creators. We run workshops,
-                hackathons, and projects to help you level up your skills, collaborate with peers,
-                and build things that matter.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
-              initial={{ opacity: 0, y: 30 }}
+              About DevCatalyst
+            </motion.h2>
+            <motion.p
+              className="text-lg sm:text-1xl text-gray-200 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
             >
-              <h3 className="text-xl font-medium text-[#673ab7] mb-3">Who it&apos;s for</h3>
-              <p className="text-[#5f6368] leading-relaxed">
-                Whether you&apos;re into coding, design, content, or outreach — there&apos;s a place for you.
-                We have tracks for Technical, Social, Content, and Outreach. Join to learn, contribute,
-                and be part of something bigger.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="bg-white rounded-xl border border-gray-200 border-t-4 border-t-[#673ab7] shadow-sm p-6 sm:p-8"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <h3 className="text-xl font-medium text-[#673ab7] mb-3">Why join</h3>
-              <p className="text-[#5f6368] leading-relaxed">
-                Get hands-on experience, mentorship, and a network of like-minded people. We focus on
-                real projects and events so you can grow while having fun and making an impact.
-              </p>
-            </motion.div>
+              DevCatalyst is a vibrant community of developers and creators who learn, build, and grow together.
+              We run workshops, hackathons, and collaborative projects across Technical, Social, Content, and
+              Outreach tracks — helping you level up your skills, gain hands-on experience, and make a real impact.
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
       {/* CTA at the bottom */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pb-24">
-        <motion.div
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#673ab7] p-8 sm:p-12 text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
-        >
-          <motion.h2
-            className="text-2xl sm:text-3xl font-semibold text-[#202124] mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.6, -0.05, 0.01, 0.99] }}
-          >
-            Ready to be part of the community?
-          </motion.h2>
-          <motion.p
-            className="text-[#5f6368] mb-8 max-w-lg mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
-          >
-            Fill out the recruitment form and we&apos;ll get in touch. We can&apos;t wait to meet you.
-          </motion.p>
+      <section id="join" className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* Collage.svg Background */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <img
+            src="/assets/Collage.png"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="bg-white/10 backdrop-blur-md rounded-2xl shadow-[0_0_40px_rgba(244,244,244,0.3),0_0_80px_rgba(244,244,244,0.15)] border border-white/20 p-8 sm:p-12 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
           >
-            <Link
-              href="/form"
-              className="inline-block bg-[#673ab7] text-white font-semibold px-8 py-4 rounded-lg shadow-md hover:bg-[#5e35b1] transition-colors"
+            <motion.h2
+              className="text-2xl sm:text-3xl font-semibold text-white mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.6, -0.05, 0.01, 0.99] }}
             >
-              Join Community
-            </Link>
+              Ready to be part of the community?
+            </motion.h2>
+            <motion.p
+              className="text-gray-200 mb-8 max-w-lg mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
+            >
+              Fill out the recruitment form and we&apos;ll get in touch. We can&apos;t wait to meet you.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+            >
+              <Link
+                href="/form"
+                className="group relative inline-flex overflow-hidden items-center justify-center gap-2 bg-purple-800 text-white font-semibold px-8 py-4 rounded-md shadow transition-all duration-300 ease-out hover:ring-2 hover:ring-black hover:ring-offset-2"
+              >
+                <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-10 transition-all duration-1000 ease-out group-hover:-translate-x-60" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <Image
+                    src={devCatalystLogo}
+                    alt="DevCatalyst Logo"
+                    className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-150 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                  />
+                  Join Community
+                </span>
+              </Link>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </section>
     </div>
   );

@@ -179,10 +179,13 @@ export default function FormPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen py-8 px-4 bg-[#f0ebf8]">
-        <div className="max-w-[770px] mx-auto bg-white rounded-lg border border-gray-200 border-t-8 border-t-[#673ab7] shadow-sm p-8">
-          <h1 className="text-3xl font-normal text-[#202124] mb-4">
-            Dev Catalyst Recruitment Drive
+      <div className="relative min-h-screen py-8 px-4">
+        {/* Tiled Collage Background */}
+        <div className="fixed inset-0 z-0" style={{ backgroundImage: "url('/assets/Collage.png')", backgroundSize: '600px', backgroundRepeat: 'repeat' }} />
+        <div className="fixed inset-0 z-0 bg-black/60" />
+        <div className="relative z-10 max-w-[770px] mx-auto bg-white rounded-lg border border-gray-200 border-t-8 border-t-[#673ab7] shadow-sm p-8">
+          <h1 className="text-3xl font-bold text-[#202124] mb-4">
+            DevCatalyst Recruitment Drive
           </h1>
           <p className="text-sm text-[#202124] mb-4">
             Your response has been recorded.
@@ -194,7 +197,7 @@ export default function FormPage() {
             Back to home
           </a>
         </div>
-        <div className="max-w-[770px] mx-auto mt-4 text-center">
+        <div className="relative z-10 max-w-[770px] mx-auto mt-4 text-center">
           <p className="text-xs text-[#5f6368]">
             This content is neither created nor endorsed by Google. - Terms of Service - Privacy Policy
           </p>
@@ -205,60 +208,65 @@ export default function FormPage() {
   }
 
   return (
-    <div className="min-h-screen py-3 sm:py-8 px-2 sm:px-4">
-      <FormHeader />
+    <div className="relative min-h-screen py-3 sm:py-8 px-2 sm:px-4">
+      {/* Tiled Collage Background */}
+      <div className="fixed inset-0 z-0" style={{ backgroundImage: "url('/assets/Collage.png')", backgroundSize: '600px', backgroundRepeat: 'repeat' }} />
+      <div className="fixed inset-0 z-0 bg-black/60" />
+      <div className="relative z-10">
+        <FormHeader />
 
-      <form onSubmit={handleSubmit} className="max-w-[770px] mx-auto">
-        {formStructure.map((section) => (
-          isSectionVisible(section) && (
-            <div key={section.id} className="mb-4">
-              {section.title !== "Basic Information" && (
-                <div className="mb-4 pt-4 px-1">
-                  <div className="bg-[#673ab7] text-white p-3 rounded-md shadow-sm inline-block min-w-[200px]">
-                    <h2 className="text-lg font-medium">{section.title}</h2>
+        <form onSubmit={handleSubmit} className="max-w-[770px] mx-auto">
+          {formStructure.map((section) => (
+            isSectionVisible(section) && (
+              <div key={section.id} className="mb-4">
+                {section.title !== "Basic Information" && (
+                  <div className="mb-4 pt-4 px-1">
+                    <div className="bg-[#673ab7] text-white p-3 rounded-md shadow-sm inline-block min-w-[200px]">
+                      <h2 className="text-lg font-medium">{section.title}</h2>
+                    </div>
+                    {section.description && (
+                      <p className="text-sm text-[#5f6368] mt-2 ml-1 whitespace-pre-line">{section.description}</p>
+                    )}
                   </div>
-                  {section.description && (
-                    <p className="text-sm text-[#5f6368] mt-2 ml-1 whitespace-pre-line">{section.description}</p>
-                  )}
-                </div>
-              )}
+                )}
 
-              {section.questions.map((q) => (
-                <QuestionCard
-                  key={q.id}
-                  title={q.text}
-                  required={q.required}
-                  description={q.description}
-                  error={errors[q.id]}
-                >
-                  {renderInput(q, formData, handleChange, errors)}
-                </QuestionCard>
-              ))}
-            </div>
-          )
-        ))}
+                {section.questions.map((q) => (
+                  <QuestionCard
+                    key={q.id}
+                    title={q.text}
+                    required={q.required}
+                    description={q.description}
+                    error={errors[q.id]}
+                  >
+                    {renderInput(q, formData, handleChange, errors)}
+                  </QuestionCard>
+                ))}
+              </div>
+            )
+          ))}
 
-        <div className="flex justify-between items-center px-4 mt-8 pb-12">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-[#673ab7] text-white px-6 py-2 rounded-[4px] font-medium text-sm hover:bg-[#5e35b1] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormData({})}
-            className="text-[#673ab7] text-sm font-medium hover:bg-purple-50 px-3 py-2 rounded">
-            Clear form
-          </button>
+          <div className="flex justify-between items-center px-4 mt-8 pb-12">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-[#673ab7] text-white px-6 py-2 rounded-[4px] font-medium text-sm hover:bg-[#5e35b1] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({})}
+              className="text-[#673ab7] text-sm font-medium hover:bg-purple-50 px-3 py-2 rounded">
+              Clear form
+            </button>
+          </div>
+        </form>
+        <div className="max-w-[770px] mx-auto mt-4 text-center pb-8">
+          <p className="text-xs text-[#5f6368]">
+            This content is neither created nor endorsed by Google. - Terms of Service - Privacy Policy
+          </p>
+          <p className="text-xl text-[#5f6368] font-semibold mt-2 opacity-50"> Google Forms </p>
         </div>
-      </form>
-      <div className="max-w-[770px] mx-auto mt-4 text-center pb-8">
-        <p className="text-xs text-[#5f6368]">
-          This content is neither created nor endorsed by Google. - Terms of Service - Privacy Policy
-        </p>
-        <p className="text-xl text-[#5f6368] font-semibold mt-2 opacity-50"> Google Forms </p>
       </div>
     </div>
   );

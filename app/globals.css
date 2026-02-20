@@ -24,4 +24,55 @@
   .google-shadow {
     box-shadow: 0 1px 3px 0 rgb(60 64 67 / 30%), 0 4px 8px 3px rgb(60 64 67 / 15%);
   }
+
+  /* Uiverse unlock button */
+  .unlock-btn {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.5s ease-in;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .unlock-btn::before,
+  .unlock-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 0;
+    height: 100%;
+    transform: skew(15deg);
+    transition: all 0.5s;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .unlock-btn::before {
+    left: -10px;
+    background: #240046;
+  }
+
+  .unlock-btn::after {
+    right: -10px;
+    background: #5a189a;
+  }
+
+  .unlock-btn:hover::before,
+  .unlock-btn:hover::after {
+    width: 58%;
+  }
+
+  .unlock-btn:hover span {
+    color: #e0aaff;
+    transition: 0.3s;
+  }
+
+  .unlock-btn:disabled:hover::before,
+  .unlock-btn:disabled:hover::after {
+    width: 0;
+  }
+
+  .unlock-btn:disabled:hover span {
+    color: inherit;
+  }
 }
