@@ -9,8 +9,11 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Dev Catalyst Recruitment Form",
+  title: "DevCatalyst Recruitment Form",
   description: "Join the team!",
+  icons: {
+    icon: "/assets/DevCatalyst_logo.png",
+  },
 };
 
 export default function RootLayout({
