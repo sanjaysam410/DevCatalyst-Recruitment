@@ -230,18 +230,18 @@ What you’ll do:
         placeholder: "https://..."
       },
       // END SPLIT LINKS
-      {
+      /*{
         id: "learning_approach",
         type: "textarea",
         text: "Scenario: You're assigned to build a feature you've never worked with before, and it's due in one week. Walk us through your approach from Day 1 to Day 7.",
         required: true
-      },
-      {
+      },*/
+      /*{
         id: "tech_struggle",
         type: "textarea",
         text: "Describe a technical problem you struggled with. How long did you struggle, and what finally helped you solve it?",
         required: true
-      },
+      },*/
       {
         id: "tech_blocker",
         type: "text",
@@ -320,12 +320,12 @@ What you’ll do:
         text: "Write a LinkedIn post (150 words max) announcing that DevCatalyst just completed a successful hackathon with 200 participants.",
         required: true
       },
-      {
+      /*{
         id: "social_influencers",
         type: "textarea",
         text: "Name 3 tech influencers you follow and what you like about their content.",
         required: true
-      },
+      },*/
       {
         id: "social_viral_idea",
         type: "textarea",
