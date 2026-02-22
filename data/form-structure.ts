@@ -151,6 +151,38 @@ export const formStructure: Section[] = [
   {
     id: "track_selection_section",
     title: "Team Selection",
+    description: `🔹 Social Media Team
+The Social Media Team is the voice of our club in the digital world. This team manages all our social platforms and ensures that our activities, achievements, and events reach the right audience in an engaging way.
+What you’ll do:
+• Manage and grow the club’s social media presence
+• Create engaging posts, captions, and stories
+• Stay updated with trends and adapt them creatively for the club
+• Ensure consistent branding and communication across platforms
+
+🔹 Technical Team
+The Technical Team is the backbone of our club’s digital infrastructure. From building platforms to maintaining tools, this team turns ideas into real, working solutions.
+Fun fact: the recruitment website you’re filling right now is built and maintained by this team.
+What you’ll do:
+• Develop and maintain the club’s website and internal tools
+• Build platforms used for events, registrations, and workflows
+• Experiment with new technologies and improve existing systems
+• Collaborate with other teams to bring their ideas to life
+
+🔹 Outreach Team
+The Outreach Team plays a crucial role in expanding the club’s reach and impact. This team connects the club with sponsors, industry professionals, and resource persons who help us conduct high-value events and gain real-world exposure.
+What you’ll do:
+• Reach out to sponsors, speakers, and industry experts
+• Build and maintain professional relationships
+• Coordinate collaborations and partnerships for events
+• Help bring industry-level opportunities to the club
+
+🔹 Content Creation Team
+The Content Creation Team is responsible for shaping the club’s creative identity. This team transforms ideas into visually appealing and engaging content that represents the club’s vision and energy.
+What you’ll do:
+• Design posters, banners, and digital creatives
+• Create reels, videos, and visual content for events and promotions
+• Brainstorm unique and innovative content ideas
+• Work closely with the Social Media Team to maintain a strong visual presence`,
     questions: [
       {
         id: "selected_track",

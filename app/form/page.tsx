@@ -18,6 +18,7 @@ const formSchema = z.object({
   full_name: z.string().min(1, "Full Name is required"),
   roll_number: z.string().regex(/^1608-\d{2}-\d{3}-\d{3}$/, "Format must be 1608-YY-XXX-XXX (e.g., 1608-25-733-019)"),
   branch: z.string().min(1, "Branch is required"),
+  section: z.string().min(1, "Section is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   why_join: z.string().min(50, "Please provide a more detailed answer (min 50 chars)"),
@@ -127,50 +128,85 @@ export default function FormPage() {
     return formData[section.condition.fieldId] === section.condition.value;
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
+  const visibleSections = React.useMemo(() => {
+    return formStructure.filter(isSectionVisible);
+  }, [formData]);
+
+  const validateCurrentStep = () => {
+    const currentSection = visibleSections[currentStepIndex];
+    if (!currentSection) return true;
+
+    const newErrors: Record<string, string> = { ...errors };
     let isValid = true;
 
-    formStructure.forEach(section => {
-      if (!isSectionVisible(section)) return;
+    currentSection.questions.forEach(question => {
+      const value = formData[question.id];
 
-      section.questions.forEach(question => {
-        const value = formData[question.id];
+      if (question.required) {
+        const isEmpty =
+          value === undefined ||
+          value === null ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0);
 
-        if (question.required) {
-          const isEmpty =
-            value === undefined ||
-            value === null ||
-            value === "" ||
-            (Array.isArray(value) && value.length === 0);
-
-          if (isEmpty) {
-            newErrors[question.id] = "This is a required question";
-            isValid = false;
-            return;
-          }
-        }
-
-        if (value && value !== "") {
+        if (isEmpty) {
+          newErrors[question.id] = "This is a required question";
+          isValid = false;
+        } else if (value && value !== "") {
           const fieldSchema = formSchema.shape[question.id as keyof typeof formSchema.shape] as ZodTypeAny | undefined;
           if (fieldSchema) {
             const fieldResult = fieldSchema.safeParse(value);
             if (!fieldResult.success) {
               newErrors[question.id] = fieldResult.error.issues[0].message;
               isValid = false;
+            } else {
+              delete newErrors[question.id];
             }
+          } else {
+            delete newErrors[question.id];
           }
         }
-      });
+      } else if (value && value !== "") {
+        const fieldSchema = formSchema.shape[question.id as keyof typeof formSchema.shape] as ZodTypeAny | undefined;
+        if (fieldSchema) {
+          const fieldResult = fieldSchema.safeParse(value);
+          if (!fieldResult.success) {
+            newErrors[question.id] = fieldResult.error.issues[0].message;
+            isValid = false;
+          } else {
+            delete newErrors[question.id];
+          }
+        } else {
+          delete newErrors[question.id];
+        }
+      } else {
+        delete newErrors[question.id];
+      }
     });
 
     setErrors(newErrors);
     return isValid;
   };
 
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      setCurrentStepIndex(prev => Math.min(visibleSections.length - 1, prev + 1));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStepIndex(prev => Math.max(0, prev - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) {
+    if (!validateCurrentStep()) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -343,50 +379,115 @@ export default function FormPage() {
 
         <FormHeader />
 
-        <form onSubmit={handleSubmit} className="max-w-[770px] mx-auto">
-          {formStructure.map((section) => (
-            isSectionVisible(section) && (
-              <div key={section.id} className="mb-4">
-                {section.title !== "Basic Information" && (
-                  <div className="mb-4 pt-4 px-1">
-                    <div className="bg-[#673ab7] text-white p-3 rounded-md shadow-sm inline-block min-w-[200px]">
-                      <h2 className="text-lg font-medium">{section.title}</h2>
-                    </div>
-                    {section.description && (
-                      <p className="text-sm text-white mt-2 ml-1 whitespace-pre-line">{section.description}</p>
-                    )}
+        <form onSubmit={currentStepIndex === visibleSections.length - 1 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }} className="max-w-[770px] mx-auto">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 sm:p-10 min-h-[400px]">
+
+            {/* Progress Bar Header matches reference image */}
+            <div className="mb-10 sm:mb-12 mt-2">
+              <div className="max-w-lg mx-auto">
+                {/* Thin Top Bar */}
+                <div className="relative h-[6px] w-full bg-[#EADDFF] rounded-full mb-6 overflow-hidden">
+                  <div
+                    className="absolute left-0 top-0 h-full bg-[#673ab7] rounded-full transition-all duration-700 ease-in-out"
+                    style={{ width: `${(currentStepIndex / (Math.max(1, visibleSections.length - 1))) * 100}%` }}
+                  />
+                </div>
+
+                {/* Numbered Steps Below Bar */}
+                <div className="flex justify-between items-center px-1">
+                  {visibleSections.map((sec, idx) => {
+                    const isActive = idx === currentStepIndex;
+                    const isCompleted = idx < currentStepIndex;
+                    return (
+                      <div key={idx} className="flex flex-col items-center justify-center">
+                        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-[15px] transition-all duration-700 ease-in-out ${isActive ? 'bg-[#673ab7] text-white shadow-lg shadow-purple-500/30 scale-110' : 'bg-[#EADDFF] text-[#673ab7] hover:bg-[#D0BCFF]'}`}>
+                          {idx + 1}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <style>{`
+              @keyframes slideFadeIn {
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
+              }
+              .slide-anim {
+                animation: slideFadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+              }
+            `}</style>
+
+            <div key={currentStepIndex} className="slide-anim">
+              {/* Section Header */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-[#202124] border-b border-gray-100 pb-4 tracking-tight">{visibleSections[currentStepIndex]?.title}</h2>
+                {visibleSections[currentStepIndex]?.description && (
+                  <div className="text-[15px] text-[#5f6368] mt-4 leading-relaxed">
+                    {visibleSections[currentStepIndex].description?.split('\n').map((line, i) => {
+                      if (line.trim().startsWith('🔹')) {
+                        return <h3 key={i} className="font-bold text-[#673ab7] text-[17px] mt-6 mb-2">{line}</h3>;
+                      }
+                      if (line.trim().startsWith('What you’ll do:')) {
+                        return <div key={i} className="font-semibold text-[#202124] mt-3 mb-1">{line}</div>;
+                      }
+                      return <div key={i} className="min-h-[1.5rem]">{line}</div>;
+                    })}
                   </div>
                 )}
+              </div>
 
-                {section.questions.map((q) => (
-                  <QuestionCard
-                    key={q.id}
-                    title={q.text}
-                    required={q.required}
-                    description={q.description}
-                    error={errors[q.id]}
-                  >
-                    {renderInput(q, formData, handleChange, errors)}
-                  </QuestionCard>
+              {/* Dynamic Rendering of Current Step Questions */}
+              <div className="space-y-8">
+                {visibleSections[currentStepIndex]?.questions.map((q) => (
+                  <div key={q.id} className="group">
+                    <label className="text-[15px] text-[#202124] font-medium mb-1 block">
+                      {q.text} {q.required && <span className="text-[#d93025] ml-0.5">*</span>}
+                    </label>
+                    {q.description && (
+                      <p className="text-xs text-[#5f6368] mb-3 whitespace-pre-line leading-relaxed">
+                        {q.description}
+                      </p>
+                    )}
+                    <div className="mt-2 text-sm">
+                      {renderInput(q, formData, handleChange, errors)}
+                    </div>
+                    {errors[q.id] && (
+                      <div className="text-[#d93025] text-xs mt-2 flex items-center font-medium">
+                        <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                        {errors[q.id]}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-            )
-          ))}
+            </div>
 
-          <div className="flex justify-between items-center px-4 mt-8 pb-12">
-            <button
-              type="submit"
-              disabled={isSubmitting || isDeadlinePassed}
-              className="bg-[#673ab7] text-white px-6 py-2 rounded-[4px] font-medium text-sm hover:bg-[#5e35b1] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({})}
-              className="text-[#673ab7] text-sm font-medium hover:bg-purple-50 px-3 py-2 rounded">
-              Clear form
-            </button>
+            {/* Step Navigation Controls */}
+            <div className="border-t border-gray-100 mt-10 pt-6 flex justify-between items-center">
+              {currentStepIndex > 0 ? (
+                <button type="button" onClick={handleBack} className="text-gray-500 font-medium text-sm hover:text-gray-800 transition-colors px-2 py-2 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                  Back
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {currentStepIndex < visibleSections.length - 1 ? (
+                <button type="button" onClick={handleNext} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200">
+                  Next
+                </button>
+              ) : (
+                <button type="submit" disabled={isSubmitting || isDeadlinePassed} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200 disabled:opacity-60 disabled:shadow-none">
+                  {isSubmitting ? 'Submitting...' : 'Submit Response'}
+                </button>
+              )}
+            </div>
           </div>
         </form>
         <div className="max-w-[770px] mx-auto mt-4 text-center pb-8">

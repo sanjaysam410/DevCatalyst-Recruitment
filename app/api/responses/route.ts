@@ -37,6 +37,7 @@ export async function GET() {
             full_name: row.get('Full Name'),
             roll_number: row.get('Roll Number'),
             branch: row.get('Branch'),
+            section: row.get('Section'),
             selected_track: row.get('Selected Track'),
             email: row.get('Email'),
             phone: row.get('Phone'),

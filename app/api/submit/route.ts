@@ -46,6 +46,7 @@ export async function POST(req: Request) {
             "Full Name": body.full_name,
             "Roll Number": body.roll_number,
             "Branch": body.branch,
+            "Section": body.section,
             "Email": body.email,
             "Phone": body.phone,
             "Why Join": body.why_join,
@@ -128,8 +129,22 @@ export async function POST(req: Request) {
         // Only check headerValues if loaded successfully, otherwise headers are needed
         if (!headersLoaded || sheet.rowCount === 0 || (headersLoaded && sheet.headerValues.length === 0)) {
             await sheet.setHeaderRow(Object.keys(row));
+        } else {
+            // Check if the spreadsheet is missing any headers we are trying to insert (like Section)
+            const currentHeaders = [...sheet.headerValues];
+            let needsUpdate = false;
+            Object.keys(row).forEach(key => {
+                if (!currentHeaders.includes(key)) {
+                    currentHeaders.push(key);
+                    needsUpdate = true;
+                }
+            });
+            if (needsUpdate) {
+                await sheet.setHeaderRow(currentHeaders);
+            }
         }
 
+        await sheet.loadHeaderRow(); // Ensure exact mapping before row injection
         await sheet.addRow(row);
 
         return NextResponse.json({ success: true, message: 'Submitted successfully' });
