@@ -87,6 +87,7 @@ export default function FormPage() {
 
   const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
   const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
+  const [submitReady, setSubmitReady] = useState(false);
 
   React.useEffect(() => {
     const updateCountdown = () => {
@@ -113,6 +114,8 @@ export default function FormPage() {
     return () => clearInterval(timer);
   }, [DEADLINE]);
 
+
+
   const handleChange = (id: string, value: FormValue) => {
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id]) {
@@ -134,6 +137,15 @@ export default function FormPage() {
   const visibleSections = React.useMemo(() => {
     return formStructure.filter(isSectionVisible);
   }, [formData]);
+
+  React.useEffect(() => {
+    if (currentStepIndex === visibleSections.length - 1) {
+      const timer = setTimeout(() => setSubmitReady(true), 600);
+      return () => clearTimeout(timer);
+    } else {
+      setSubmitReady(false);
+    }
+  }, [currentStepIndex, visibleSections.length]);
 
   const validateCurrentStep = () => {
     const currentSection = visibleSections[currentStepIndex];
@@ -409,7 +421,7 @@ export default function FormPage() {
 
         <FormHeader />
 
-        <form onSubmit={currentStepIndex === visibleSections.length - 1 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }} className="max-w-[770px] mx-auto">
+        <form onSubmit={(e) => { e.preventDefault(); }} className="max-w-[770px] mx-auto">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 sm:p-10 min-h-[400px]">
 
             {/* Progress Bar Header matches reference image */}
@@ -513,7 +525,7 @@ export default function FormPage() {
                   {isCheckingRollNumber ? 'Checking...' : 'Next'}
                 </button>
               ) : (
-                <button type="submit" disabled={isSubmitting || isDeadlinePassed} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200 disabled:opacity-60 disabled:shadow-none">
+                <button type="button" onClick={handleSubmit} disabled={isSubmitting || isDeadlinePassed || !submitReady} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200 disabled:opacity-60 disabled:shadow-none">
                   {isSubmitting ? 'Submitting...' : 'Submit Response'}
                 </button>
               )}
