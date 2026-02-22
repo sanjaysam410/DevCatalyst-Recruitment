@@ -79,6 +79,7 @@ export default function FormPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isCheckingRollNumber, setIsCheckingRollNumber] = useState(false);
 
   // Create a fixed deadline (25th February 2026, 01:00 PM IST)
   // Timezone adjustment for IST is +05:30. UTC: 2026-02-25T07:30:00Z
@@ -190,8 +191,32 @@ export default function FormPage() {
     return isValid;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateCurrentStep()) {
+      if (currentStepIndex === 0 && formData.roll_number) {
+        setIsCheckingRollNumber(true);
+        try {
+          const response = await fetch('/api/check-roll-number', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roll_number: formData.roll_number }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.exists) {
+              alert("Application already exists for this roll number.");
+              setIsCheckingRollNumber(false);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Checking error", error);
+        } finally {
+          setIsCheckingRollNumber(false);
+        }
+      }
+
       setCurrentStepIndex(prev => Math.min(visibleSections.length - 1, prev + 1));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -234,6 +259,11 @@ export default function FormPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 409) {
+          alert("Application already exists for this roll number.");
+          setIsSubmitting(false);
+          return;
+        }
         throw new Error('Failed to submit to server');
       }
 
@@ -479,8 +509,8 @@ export default function FormPage() {
               )}
 
               {currentStepIndex < visibleSections.length - 1 ? (
-                <button type="button" onClick={handleNext} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200">
-                  Next
+                <button type="button" onClick={handleNext} disabled={isCheckingRollNumber} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200 disabled:opacity-60 disabled:shadow-none">
+                  {isCheckingRollNumber ? 'Checking...' : 'Next'}
                 </button>
               ) : (
                 <button type="submit" disabled={isSubmitting || isDeadlinePassed} className="bg-[#673ab7] text-white px-8 py-2.5 rounded shadow-sm font-semibold text-sm hover:bg-[#5e35b1] transition-all focus:ring-4 focus:ring-purple-200 disabled:opacity-60 disabled:shadow-none">

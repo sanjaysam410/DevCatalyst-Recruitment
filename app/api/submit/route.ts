@@ -39,6 +39,23 @@ export async function POST(req: Request) {
         // 3. Select the first sheet
         const sheet = doc.sheetsByIndex[0];
 
+        // 3.5 Check for duplicate Roll Number
+        let headersLoaded = false;
+        try {
+            await sheet.loadHeaderRow();
+            headersLoaded = true;
+        } catch (e) {
+            // Headers likely don't exist or loading failed
+        }
+
+        if (headersLoaded) {
+            const rows = await sheet.getRows();
+            const isDuplicate = rows.some(row => row.get("Roll Number") === body.roll_number);
+            if (isDuplicate) {
+                return NextResponse.json({ success: false, error: 'Application already exists' }, { status: 409 });
+            }
+        }
+
         // 4. Map Form Data to Sheet Row
         // We flatten the structure a bit for the sheet columns
         const row = {
@@ -111,14 +128,6 @@ export async function POST(req: Request) {
         };
 
         // 5. Add Row or Set Headers
-        let headersLoaded = false;
-        try {
-            await sheet.loadHeaderRow();
-            headersLoaded = true;
-        } catch (e) {
-            // Headers likely don't exist or loading failed
-            // We will set them below
-        }
 
         // Resize if needed
         const requiredColumns = Object.keys(row).length;
