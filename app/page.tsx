@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import devCatalystLogo from "../public/assets/DevCatalyst_logo.png";
 import VantaBackground from "./components/VantaBackground";
 import DynamicIslandNav from "./components/DynamicIslandNav";
+import { useEffect, useState } from "react";
 
 const NAV_SECTIONS = [
   { id: "hero", label: "Home" },
@@ -14,6 +15,30 @@ const NAV_SECTIONS = [
 ];
 
 export default function Home() {
+  const DEADLINE = new Date("2026-02-25T13:00:00+05:30").getTime();
+  const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const difference = DEADLINE - now;
+
+      if (difference <= 0) {
+        setTimeLeft(null);
+      } else {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        });
+      }
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const staggerContainer = {
     initial: {},
@@ -131,7 +156,7 @@ export default function Home() {
             alt=""
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
@@ -165,6 +190,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+              className="flex flex-col items-center gap-8"
             >
               <Link
                 href="/form"
@@ -180,6 +206,38 @@ export default function Home() {
                   Join Community
                 </span>
               </Link>
+
+              {timeLeft && (
+                <div className="flex justify-center items-center gap-3 sm:gap-4 text-white">
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl sm:text-3xl font-bold bg-white/10 px-3 py-2 rounded-lg border border-white/20 shadow-inner backdrop-blur-sm min-w-[50px] sm:min-w-[60px]">
+                      {String(timeLeft.days).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] sm:text-xs uppercase mt-2 opacity-70 tracking-wider font-medium">Days</span>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-light opacity-50 mb-6">:</span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl sm:text-3xl font-bold bg-white/10 px-3 py-2 rounded-lg border border-white/20 shadow-inner backdrop-blur-sm min-w-[50px] sm:min-w-[60px]">
+                      {String(timeLeft.hours).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] sm:text-xs uppercase mt-2 opacity-70 tracking-wider font-medium">Hrs</span>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-light opacity-50 mb-6">:</span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl sm:text-3xl font-bold bg-white/10 px-3 py-2 rounded-lg border border-white/20 shadow-inner backdrop-blur-sm min-w-[50px] sm:min-w-[60px]">
+                      {String(timeLeft.minutes).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] sm:text-xs uppercase mt-2 opacity-70 tracking-wider font-medium">Min</span>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-light opacity-50 mb-6">:</span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl sm:text-3xl font-bold bg-white/10 px-3 py-2 rounded-lg border border-white/20 shadow-inner backdrop-blur-sm min-w-[50px] sm:min-w-[60px] text-purple-300">
+                      {String(timeLeft.seconds).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] sm:text-xs uppercase mt-2 opacity-70 tracking-wider font-medium">Sec</span>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         </div>

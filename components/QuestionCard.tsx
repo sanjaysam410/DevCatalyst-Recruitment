@@ -28,7 +28,7 @@ export default function QuestionCard({
             )}
         >
             <div className="mb-4">
-                <label className="text-base text-[#202124] block mb-1 font-medium">
+                <label className="text-base text-[#202124] block mb-1 font-medium whitespace-pre-line">
                     {title} {required && <span className="text-[#d93025]">*</span>}
                 </label>
                 {description && (

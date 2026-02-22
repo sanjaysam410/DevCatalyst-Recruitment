@@ -13,6 +13,7 @@ export interface Question {
   minLabel?: string; // For scale
   maxLabel?: string; // For scale
   placeholder?: string;
+  defaultValue?: string;
 }
 
 export interface Section {
@@ -48,16 +49,24 @@ export const formStructure: Section[] = [
         type: "select",
         text: "Branch",
         options: [
-          "CSE", "IT", "EEE", "ECE", "Civil", "Mechanical", "CSE(AIML)", "CSE(AIDS)", "Data Science"
+          "CSE", "IT", "EEE", "ECE", "Civil", "Mechanical", "CSE(AIML)", "CSE(DS)"
         ],
+        required: true
+      },
+      {
+        id: "section",
+        type: "select",
+        text: "Section",
+        options: ["A", "B", "C", "D"],
         required: true
       },
       { id: "email", type: "text", text: "Email Address", required: true },
       { id: "phone", type: "text", text: "Phone Number", required: true },
+      { id: "college", type: "select", text: "College Name", options: ["Matrusri Engineering College"], required: true },
       {
         id: "why_join",
         type: "textarea",
-        text: "Why do you want to join Dev Catalyst?",
+        text: "Why do you want to join DevCatalyst?",
         description: "Open-ended, 150-200 words.",
         required: true
       },
@@ -73,12 +82,12 @@ export const formStructure: Section[] = [
     id: "behavioral",
     title: "Behavioral & Commitment Assessment",
     questions: [
-      {
+      /*{
         id: "prioritization_scenario",
         type: "textarea",
         text: "Scenario: You have a mid-semester exam tomorrow, but the club has an urgent deadline for an event happening in 2 days. How do you handle this?",
         required: true
-      },
+      },*/
       {
         id: "time_commitment",
         type: "radio",
@@ -93,19 +102,20 @@ export const formStructure: Section[] = [
         required: true
       },
       // ENHANCED QUESTION
-      {
+      /*{
         id: "unlimited_resources",
         type: "textarea",
         text: "If you had unlimited resources for a day, what project would you start and why?",
         description: "This helps us understand your vision and passion.",
         required: false
-      }
+      }*/
     ]
   },
+  //Event Planning & Management
   {
     id: "event_planning",
     title: "Event Planning & Management",
-    description: "Mandatory Common Section",
+    description: "Mandatory Common Section*",
     questions: [
       {
         id: "event_experience",
@@ -114,16 +124,16 @@ export const formStructure: Section[] = [
         options: ["Yes", "No"],
         required: true
       },
-      {
+      /*{
         id: "event_experience_details",
         type: "textarea",
         text: "If Yes: Describe your role, team size, and one challenge. If No: How would you approach organizing a 100-person technical workshop with a budget of ₹5,000?",
         required: true
-      },
+      },*/
       {
         id: "crisis_management",
         type: "ranking", // We might implement this as a drag-drop or just text for MVP
-        text: "Rapid Decision Exercise: You're managing an event. 30 minutes before start time: 1) Keynote speaker cancels, 2) 50 more people show up, 3) Projector fails. Rank these by priority (1-3) and explain your first action for the top priority.",
+        text: "Rapid Decision Exercise: You're managing an event 30 minutes before start time: \n 1) Keynote speaker cancels, \n 2) 50 more people show up, \n 3) Projector fails. Rank these by priority (1-3) and explain your first action for the top priority.",
         description: "Please list your ranking and explanation.",
         required: true
       },
@@ -275,7 +285,7 @@ export const formStructure: Section[] = [
       {
         id: "social_writing_task",
         type: "textarea",
-        text: "Write a LinkedIn post (150 words max) announcing that Dev Catalyst just completed a successful hackathon with 200 participants.",
+        text: "Write a LinkedIn post (150 words max) announcing that DevCatalyst just completed a successful hackathon with 200 participants.",
         required: true
       },
       {
@@ -287,7 +297,7 @@ export const formStructure: Section[] = [
       {
         id: "social_viral_idea",
         type: "textarea",
-        text: "Quick Challenge: If you had to make Dev Catalyst go viral with one reel/short video idea, what would it be?",
+        text: "Quick Challenge: If you had to make DevCatalyst go viral with one reel/short video idea, what would it be?",
         required: true
       },
       // ENHANCED QUESTION
@@ -387,7 +397,7 @@ export const formStructure: Section[] = [
       {
         id: "email_writing_exercise",
         type: "textarea",
-        text: "Write a cold outreach email (100-150 words) to a tech startup founder requesting them to sponsor Dev Catalyst's upcoming event.",
+        text: "Write a cold outreach email (100-150 words) to a tech startup founder requesting them to sponsor DevCatalyst's upcoming event.",
         required: true
       },
       {
@@ -402,7 +412,7 @@ export const formStructure: Section[] = [
       {
         id: "sponsorship_strategy",
         type: "textarea",
-        text: "Dev Catalyst needs partnerships with 5 local companies. Describe your strategy to identify and approach them.",
+        text: "DevCatalyst needs partnerships with 5 local companies. Describe your strategy to identify and approach them.",
         required: true
       },
       // ENHANCED QUESTION
@@ -420,27 +430,27 @@ export const formStructure: Section[] = [
     id: "closing",
     title: "Closing Questions",
     questions: [
-      {
+      /*{
         id: "culture_fit",
         type: "radio",
         text: "Which of these describes you best?",
         options: ["Thrive under pressure", "Prefer planned work", "Flexible/Adaptable", "Still figuring it out"],
         required: true
-      },
-      {
+      },*/
+      /*{
         id: "conflict_resolution",
         type: "textarea",
         text: "If you disagree with a decision made by club leadership, what would you do?",
         required: true
-      },
-      {
+      },*/
+      /*{
         id: "honesty_check",
         type: "scale",
         text: "On a scale of 1-10, how much did you overthink your answers in this form?",
         min: 1,
         max: 10,
         required: true
-      },
+      },*/
       {
         id: "any_questions",
         type: "textarea",
