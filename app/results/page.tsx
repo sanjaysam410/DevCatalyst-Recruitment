@@ -55,7 +55,7 @@ export default function ResultsPage() {
             <div className="fixed inset-0 z-0 bg-black/60" />
 
             {/* Navbar Minimal */}
-            <nav className="relative z-20 w-full px-6 py-6 flex justify-between items-center max-w-7xl mx-auto">
+            <nav className="relative z-20 w-full px-6 py-6 flex justify-between items-center max-w-7xl mx-auto text-white">
                 <Link href="/" className="flex items-center gap-3 group">
                     <Image
                         src={devCatalystLogo}
