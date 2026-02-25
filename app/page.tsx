@@ -11,7 +11,8 @@ import { useEffect, useState } from "react";
 const NAV_SECTIONS = [
   { id: "hero", label: "Home" },
   { id: "about", label: "About" },
-  { id: "join", label: "Join Us" },
+  // { id: "join", label: "Join Us" },
+  { id: "join", label: "Results" },
 ];
 
 export default function Home() {
@@ -167,6 +168,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
           >
+            {/*
             <motion.h2
               className="text-2xl sm:text-3xl font-semibold text-white mb-4"
               initial={{ opacity: 0, y: 20 }}
@@ -185,6 +187,16 @@ export default function Home() {
             >
               Fill out the recruitment form and we&apos;ll get in touch. We can&apos;t wait to meet you.
             </motion.p>
+            */}
+            <motion.h2
+              className="text-2xl sm:text-3xl font-semibold text-white mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.6, -0.05, 0.01, 0.99] }}
+            >
+              Results
+            </motion.h2>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -192,6 +204,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
               className="flex flex-col items-center gap-8"
             >
+              {/* 
               <Link
                 href="/form"
                 className="group relative inline-flex overflow-hidden items-center justify-center gap-2 bg-purple-800 text-white font-semibold px-8 py-4 rounded-md shadow transition-all duration-300 ease-out hover:ring-2 hover:ring-black hover:ring-offset-2"
@@ -204,6 +217,21 @@ export default function Home() {
                     className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-150 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
                   />
                   Join Community
+                </span>
+              </Link>
+              */}
+              <Link
+                href="/results"
+                className="group relative inline-flex overflow-hidden items-center justify-center gap-2 bg-purple-800 text-white font-semibold px-8 py-4 rounded-md shadow transition-all duration-300 ease-out hover:ring-2 hover:ring-black hover:ring-offset-2"
+              >
+                <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-10 transition-all duration-1000 ease-out group-hover:-translate-x-60" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <Image
+                    src={devCatalystLogo}
+                    alt="DevCatalyst Logo"
+                    className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-150 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                  />
+                  Results
                 </span>
               </Link>
 
