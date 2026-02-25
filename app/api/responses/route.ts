@@ -1,4 +1,6 @@
-
+import fs from 'fs';
+import path from 'path';
+import Papa from 'papaparse';
 import { JWT } from 'google-auth-library';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { NextResponse } from 'next/server';
@@ -7,71 +9,77 @@ export const dynamic = 'force-dynamic'; // Ensure this endpoint is never cached
 
 export async function GET() {
     try {
-        // 1. Prepare Authentication
-        if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_SHEET_ID) {
-            throw new Error('Missing Google Credentials');
-        }
+        // 1. Fetch Candidate Data from CSV
+        const filePath = path.join(process.cwd(), 'public', 'assets', 'DevCatalyst-recruitment-forms.csv');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
 
-        const privateKey = process.env.GOOGLE_PRIVATE_KEY
-            .replace(/\\n/g, '\n')
-            .replace(/"/g, '');
-
-        const serviceAccountAuth = new JWT({
-            email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-            key: privateKey,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        const parsedData = Papa.parse(fileContent, {
+            header: true,
+            skipEmptyLines: true,
         });
 
-        const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID as string, serviceAccountAuth);
+        // 2. Fetch Core Scores from Google Sheets
+        let coreScores: Record<string, string> = {};
 
-        // 2. Load the document
-        await doc.loadInfo();
-        const sheet = doc.sheetsByIndex[0];
+        try {
+            if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_SHEET_ID) {
+                const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"/g, '');
+                const auth = new JWT({
+                    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+                    key: privateKey,
+                    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+                });
+                const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, auth);
+                await doc.loadInfo();
 
-        // 3. Fetch Rows
-        const rows = await sheet.getRows();
+                const coreSheet = doc.sheetsByIndex.find(s => s.title.toLowerCase().includes('core'));
+                if (coreSheet) {
+                    try {
+                        await coreSheet.loadHeaderRow();
+                        const rows = await coreSheet.getRows();
+                        rows.forEach(row => {
+                            const roll = row.get("Roll Number");
+                            const score = row.get("Response Score");
+                            if (roll && score) {
+                                coreScores[roll] = score;
+                            }
+                        });
+                    } catch (e) {
+                        // This happens if the sheet tab exists but is completely empty (no headers)
+                        console.log("Core sheet exists but has no headers yet. Skipping score merge.");
+                    }
+                }
+            }
+        } catch (sheetError) {
+            console.error("Score Fetch Error:", sheetError);
+            // Non-critical error, continue with empty scores
+        }
 
-        // 4. Map Rows to Dashboard Format
-        const formattedSubmissions = rows.map((row) => ({
-            timestamp: row.get('Timestamp'),
-            full_name: row.get('Full Name'),
-            roll_number: row.get('Roll Number'),
-            branch: row.get('Branch'),
-            section: row.get('Section'),
-            selected_track: row.get('Selected Track'),
-            email: row.get('Email'),
-            phone: row.get('Phone'),
+        // 3. Map Rows and Merge Scores
+        const formattedSubmissions = parsedData.data.map((row: any) => {
+            const roll_number = row['Roll Number'] || '';
+            const submission: any = {
+                timestamp: row['Timestamp'] || '',
+                full_name: row['Full Name'] || '',
+                roll_number: roll_number,
+                branch: row['Branch'] || '',
+                section: row['Section'] || '',
+                selected_track: row['Selected Track'] || '',
+                email: row['Email'] || '',
+                phone: row['Phone'] || '',
+                core_response_score: coreScores[roll_number] || null
+            };
 
-            // General
-            why_join: row.get('Why Join'),
+            const coreFields = ['Timestamp', 'Full Name', 'Roll Number', 'Branch', 'Section', 'Selected Track', 'Phone'];
 
-            // Track A: Technical
-            tech_skills: row.get('Tech Skills'),
-            github_link: row.get('GitHub'),
-            linkedin_link: row.get('LinkedIn'),
-            portfolio_link_tech: row.get('Portfolio'),
+            for (const key of Object.keys(row)) {
+                if (!coreFields.includes(key) && row[key] !== undefined && row[key] !== '') {
+                    submission[key] = row[key];
+                }
+            }
 
-            // Track B: Social
-            social_platforms: row.get('Social Platforms'),
-            instagram_handle: row.get('Insta Handle'),
-            twitter_handle: row.get('Twitter Handle'),
-            linkedin_handle_social: row.get('LinkedIn (Social)'), // New field
-            other_socials: row.get('Other Socials'), // New field
-            social_analysis: row.get('Social Analysis'),
-
-            // Track C: Content
-            content_type: row.get('Content Type'),
-            content_portfolio: row.get('Portfolio Link'),
-            content_ig: row.get('Content IG'),
-            content_yt: row.get('Content YT'),
-            content_other: row.get('Content Other'),
-            tools_familiarity: row.get('Tools'),
-
-            // Track D: Outreach
-            cold_outreach_exp: row.get('Cold Outreach'),
-            outreach_comfort: row.get('Comfort'),
-            sponsorship_strategy: row.get('Strategy'),
-        }));
+            return submission;
+        });
 
         return NextResponse.json({ success: true, data: formattedSubmissions });
 
