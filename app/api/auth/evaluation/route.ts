@@ -4,17 +4,17 @@ export async function POST(req: NextRequest) {
     try {
         const { team, password } = await req.json();
 
-        // Define password vars for each team (falling back to DASHBOARD_PASSWORD if needed)
+        // Define password vars for each team
         const passwords: Record<string, string | undefined> = {
-            "technical": process.env.EVAL_TECHNICAL_PASSWORD || process.env.DASHBOARD_PASSWORD,
-            "social": process.env.EVAL_SOCIAL_PASSWORD || process.env.DASHBOARD_PASSWORD,
-            "content": process.env.EVAL_CONTENT_PASSWORD || process.env.DASHBOARD_PASSWORD,
-            "outreach": process.env.EVAL_OUTREACH_PASSWORD || process.env.DASHBOARD_PASSWORD,
-            "core": process.env.EVAL_CORE_PASSWORD || process.env.DASHBOARD_PASSWORD,
+            "technical": process.env.EVAL_TECHNICAL_PASSWORD,
+            "social": process.env.EVAL_SOCIAL_PASSWORD,
+            "content": process.env.EVAL_CONTENT_PASSWORD,
+            "outreach": process.env.EVAL_OUTREACH_PASSWORD,
+            "core": process.env.EVAL_CORE_PASSWORD,
         };
 
         const targetTeam = team?.toLowerCase()?.replace(/\s+/g, "");
-        let correctPassword = process.env.DASHBOARD_PASSWORD; // default fallback
+        let correctPassword: string | undefined;
 
         if (targetTeam?.includes("tech")) correctPassword = passwords.technical;
         else if (targetTeam?.includes("social")) correctPassword = passwords.social;

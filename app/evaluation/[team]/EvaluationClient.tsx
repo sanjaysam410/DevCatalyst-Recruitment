@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, LogOut } from "lucide-react";
 
 interface EvaluationClientProps {
     team: string;
@@ -77,6 +77,12 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
         setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
     };
 
+    const handleLogout = () => {
+        const sessionKey = `eval_auth_${team.replace(/\s+/g, "_").toLowerCase()}`;
+        sessionStorage.removeItem(sessionKey);
+        window.location.href = "/evaluation";
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#f0ebf8] flex items-center justify-center">
@@ -103,9 +109,16 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="text-sm font-medium px-3 py-1 bg-purple-100 text-purple-800 rounded-full">
+                            <div className="text-sm font-medium px-3 py-1 bg-purple-100 text-purple-800 rounded-full hidden sm:block">
                                 Evaluator Mode
                             </div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all"
+                            >
+                                <LogOut className="h-4 w-4" />
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 </div>
