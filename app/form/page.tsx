@@ -81,9 +81,11 @@ export default function FormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingRollNumber, setIsCheckingRollNumber] = useState(false);
 
-  // Create a fixed deadline (25th February 2026, 01:00 PM IST)
+  // Original deadline for display (25th February 2026, 01:00 PM IST)
   // Timezone adjustment for IST is +05:30. UTC: 2026-02-25T07:30:00Z
-  const DEADLINE = new Date("2026-02-25T13:00:00+05:30").getTime();
+  const DISPLAY_DEADLINE = new Date("2026-02-25T13:00:00+05:30").getTime();
+  // Actual deadline: 2 hours later (25th February 2026, 03:00 PM IST)
+  const ACTUAL_DEADLINE = new Date("2026-02-25T15:00:00+05:30").getTime();
 
   const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
   const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
@@ -92,18 +94,23 @@ export default function FormPage() {
   React.useEffect(() => {
     const updateCountdown = () => {
       const now = new Date().getTime();
-      const difference = DEADLINE - now;
 
-      if (difference <= 0) {
+      const actualDifference = ACTUAL_DEADLINE - now;
+      if (actualDifference <= 0) {
         setIsDeadlinePassed(true);
-        setTimeLeft(null);
       } else {
         setIsDeadlinePassed(false);
+      }
+
+      const displayDifference = DISPLAY_DEADLINE - now;
+      if (displayDifference <= 0) {
+        setTimeLeft(null);
+      } else {
         setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+          days: Math.floor(displayDifference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((displayDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((displayDifference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((displayDifference % (1000 * 60)) / 1000)
         });
       }
     };
@@ -112,7 +119,7 @@ export default function FormPage() {
     const timer = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(timer);
-  }, [DEADLINE]);
+  }, [ACTUAL_DEADLINE, DISPLAY_DEADLINE]);
 
 
 
