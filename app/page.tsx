@@ -197,6 +197,16 @@ export default function Home() {
             >
               Results
             </motion.h2>
+            <motion.p
+              className="text-gray-200 mb-8 max-w-lg mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.6, -0.05, 0.01, 0.99] }}
+            >
+              The moment you&apos;ve been waiting for is here. Click below to see the results
+              and find out if you&apos;ve made it to the next stage of our journey!
+            </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
