@@ -18,8 +18,12 @@ export async function GET() {
             skipEmptyLines: true,
         });
 
-        // 2. Fetch Core Scores from Google Sheets
+        // 2. Fetch Scores from Google Sheets
         let coreScores: Record<string, string> = {};
+        let techScores: Record<string, string> = {};
+        let contentScores: Record<string, string> = {};
+        let socialScores: Record<string, string> = {};
+        let outreachScores: Record<string, string> = {};
 
         try {
             if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_SHEET_ID) {
@@ -32,23 +36,30 @@ export async function GET() {
                 const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, auth);
                 await doc.loadInfo();
 
-                const coreSheet = doc.sheetsByIndex.find(s => s.title.toLowerCase().includes('core'));
-                if (coreSheet) {
-                    try {
-                        await coreSheet.loadHeaderRow();
-                        const rows = await coreSheet.getRows();
-                        rows.forEach(row => {
-                            const roll = row.get("Roll Number");
-                            const score = row.get("Response Score");
-                            if (roll && score) {
-                                coreScores[roll] = score;
-                            }
-                        });
-                    } catch (e) {
-                        // This happens if the sheet tab exists but is completely empty (no headers)
-                        console.log("Core sheet exists but has no headers yet. Skipping score merge.");
+                const loadScoresFromSheet = async (sheetKeyword: string, targetMap: Record<string, string>) => {
+                    const sheet = doc.sheetsByIndex.find(s => s.title.toLowerCase().includes(sheetKeyword));
+                    if (sheet) {
+                        try {
+                            await sheet.loadHeaderRow();
+                            const rows = await sheet.getRows();
+                            rows.forEach(row => {
+                                const roll = row.get("Roll Number");
+                                const score = row.get("Response Score");
+                                if (roll && score) {
+                                    targetMap[roll] = score;
+                                }
+                            });
+                        } catch (e) {
+                            console.log(`${sheetKeyword} sheet exists but has no headers yet.`);
+                        }
                     }
-                }
+                };
+
+                await loadScoresFromSheet('core', coreScores);
+                await loadScoresFromSheet('tech', techScores);
+                await loadScoresFromSheet('content', contentScores);
+                await loadScoresFromSheet('social', socialScores);
+                await loadScoresFromSheet('outreach', outreachScores);
             }
         } catch (sheetError) {
             console.error("Score Fetch Error:", sheetError);
@@ -67,7 +78,11 @@ export async function GET() {
                 selected_track: row['Selected Track'] || '',
                 email: row['Email'] || '',
                 phone: row['Phone'] || '',
-                core_response_score: coreScores[roll_number] || null
+                core_response_score: coreScores[roll_number] || null,
+                tech_response_score: techScores[roll_number] || null,
+                content_response_score: contentScores[roll_number] || null,
+                social_response_score: socialScores[roll_number] || null,
+                outreach_response_score: outreachScores[roll_number] || null
             };
 
             const coreFields = ['Timestamp', 'Full Name', 'Roll Number', 'Branch', 'Section', 'Selected Track', 'Phone'];

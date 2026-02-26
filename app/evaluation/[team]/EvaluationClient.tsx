@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronUp, LogOut } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, LogOut, Search } from "lucide-react";
 
 interface EvaluationClientProps {
     team: string;
@@ -19,11 +19,26 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
     const [loading, setLoading] = useState(true);
     const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [searchQuery, setSearchQuery] = useState("");
 
     // Form states
     const [scores, setScores] = useState<Record<string, number>>({});
     const [remarks, setRemarks] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmittingResponseScore, setIsSubmittingResponseScore] = useState(false);
+
+    const getTeamScoreKey = (teamStr: string) => {
+        const teamLower = teamStr.toLowerCase();
+        if (teamLower.includes('core')) return 'core_response_score';
+        if (teamLower.includes('tech')) return 'tech_response_score';
+        if (teamLower.includes('content')) return 'content_response_score';
+        if (teamLower.includes('social')) return 'social_response_score';
+        if (teamLower.includes('outreach')) return 'outreach_response_score';
+        return '';
+    };
+
+    const teamScoreKey = getTeamScoreKey(team);
+    const existingResponseScore = selectedCandidate ? selectedCandidate[teamScoreKey] : null;
 
     useEffect(() => {
         const fetchCandidates = async () => {
@@ -83,6 +98,16 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
         window.location.href = "/evaluation";
     };
 
+    const filteredCandidates = candidates.filter((c) => {
+        if (!searchQuery.trim()) return true;
+        const query = searchQuery.toLowerCase();
+        return (
+            (c.full_name?.toLowerCase().includes(query)) ||
+            (c.roll_number?.toLowerCase().includes(query)) ||
+            (c.branch?.toLowerCase().includes(query))
+        );
+    });
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#f0ebf8] flex items-center justify-center">
@@ -129,20 +154,34 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
 
                     {/* Sidebar: Candidate List */}
                     <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-black/5 overflow-hidden flex flex-col h-[calc(100vh-8rem)]">
-                        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                            <div>
-                                <h2 className="font-bold text-lg">Candidates</h2>
-                                <p className="text-xs text-gray-500">Waitlist ({candidates.length})</p>
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h2 className="font-bold text-lg">Candidates</h2>
+                                    <p className="text-xs text-gray-500">Waitlist ({candidates.length})</p>
+                                </div>
+                                <button onClick={toggleSort} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                                    {sortOrder === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                                </button>
                             </div>
-                            <button onClick={toggleSort} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
-                                {sortOrder === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                            </button>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search candidates..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#673ab7] focus:ring-1 focus:ring-[#673ab7] transition-all"
+                                />
+                            </div>
                         </div>
                         <div className="overflow-y-auto flex-1 p-2 space-y-1">
-                            {candidates.length === 0 ? (
-                                <p className="text-sm text-gray-500 text-center py-8">No candidates found for this track.</p>
+                            {filteredCandidates.length === 0 ? (
+                                <p className="text-sm text-gray-500 text-center py-8">
+                                    {candidates.length === 0 ? "No candidates found for this track." : "No matching candidates found."}
+                                </p>
                             ) : (
-                                candidates.map((candidate, i) => (
+                                filteredCandidates.map((candidate, i) => (
                                     <button
                                         key={candidate.timestamp || i}
                                         onClick={() => setSelectedCandidate(candidate)}
@@ -202,6 +241,11 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
                                             <div className="w-6 h-6 rounded bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">1</div>
                                             <h3 className="text-lg font-bold text-[#202124]">Response Score</h3>
                                             <span className="text-xs text-emerald-500 font-medium ml-2">— Overall Application Rating</span>
+                                            {existingResponseScore && (
+                                                <span className="ml-auto px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black border border-emerald-200 shadow-sm whitespace-nowrap">
+                                                    Submitted: {existingResponseScore}/10
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="bg-emerald-50/30 p-4 rounded-xl border border-emerald-100/50">
                                             <div className="flex justify-between items-center gap-1 sm:gap-2">
@@ -218,6 +262,57 @@ export default function EvaluationClient({ team, teamName, parameters }: Evaluat
                                                     </button>
                                                 ))}
                                             </div>
+                                            {team !== 'core' && (
+                                                <div className="mt-4 flex justify-end">
+                                                    <button
+                                                        disabled={isSubmittingResponseScore || !scores["Response Score"]}
+                                                        onClick={async () => {
+                                                            if (!selectedCandidate) return;
+
+                                                            const isConfirmed = window.confirm(`Submit only Response Score (${scores["Response Score"]}) for ${selectedCandidate.full_name}?`);
+                                                            if (!isConfirmed) return;
+
+                                                            setIsSubmittingResponseScore(true);
+                                                            try {
+                                                                const res = await fetch('/api/evaluation/submit', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({
+                                                                        candidate: selectedCandidate,
+                                                                        team: team,
+                                                                        scores: { "Response Score": scores["Response Score"] },
+                                                                        remarks: "Initial Response Score Submission"
+                                                                    })
+                                                                });
+                                                                const data = await res.json();
+                                                                if (data.success) {
+                                                                    alert("Successfully submitted the Response Score!");
+
+                                                                    const submittedScore = scores["Response Score"];
+                                                                    setCandidates((prev: any[]) => prev.map(c =>
+                                                                        c.roll_number === selectedCandidate.roll_number
+                                                                            ? { ...c, [teamScoreKey]: submittedScore }
+                                                                            : c
+                                                                    ));
+                                                                    setSelectedCandidate((prev: any) => ({ ...prev, [teamScoreKey]: submittedScore }));
+                                                                } else {
+                                                                    alert("Failed to submit: " + data.error);
+                                                                }
+                                                            } catch (error) {
+                                                                alert("An error occurred connecting to the submission server.");
+                                                            } finally {
+                                                                setIsSubmittingResponseScore(false);
+                                                            }
+                                                        }}
+                                                        className={`px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-all text-sm ${isSubmittingResponseScore || !scores["Response Score"]
+                                                            ? 'bg-emerald-300 cursor-not-allowed'
+                                                            : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-md'
+                                                            }`}
+                                                    >
+                                                        {isSubmittingResponseScore ? 'Submitting...' : 'Submit Response Score Early'}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
 
